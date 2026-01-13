@@ -60,7 +60,7 @@ def register(
 @app.post("/login")
 def login(
     request: Request,
-    identifier: str = Form(...),  # username OR email
+    identifier: str = Form(...),
     password: str = Form(...)
 ):
     db = get_db()
@@ -71,35 +71,53 @@ def login(
         (identifier, identifier)
     )
     user = cur.fetchone()
-
     cur.close()
     db.close()
 
-    # ❌ No user found
     if not user:
         return RedirectResponse("/", status_code=303)
 
-    # 🔐 Password check (argon2-safe)
-    try:
-        if not pwd.verify(password, user["password"]):
-            return RedirectResponse("/", status_code=303)
-    except Exception:
+    if not pwd.verify(password, user["password"]):
         return RedirectResponse("/", status_code=303)
 
-    # ✅ Store user in session
+    # ✅ SAVE SESSION FIRST
     request.session["user"] = {
+        "id": user["id"],
         "name": user["name"],
         "username": user["username"],
         "email": user["email"]
     }
 
+    # ✅ THEN redirect to dashboard
     return RedirectResponse("/dashboard", status_code=303)
+
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    user = request.session.get("user")
+
+    if not user:
+        return RedirectResponse("/", status_code=303)
+
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "user": user
+        }
+    )
+
 
 @app.post("/chat")
 def chat(message: str = Form(...)):
     return {"reply": CHATBOT_DATA.get(message.lower(), "Invalid option")}
+
+@app.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/", status_code=303)
+
+@app.get("/", response_class=HTMLResponse)
+def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
