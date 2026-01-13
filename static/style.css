@@ -1,0 +1,14 @@
+body{margin:0;font-family:Poppins,sans-serif;}
+.app-container{display:flex;height:100vh;}
+.sidebar{
+  width:260px;
+  background:#2980b9;
+  color:white;
+  padding:20px;
+}
+.chat-container{
+  flex:1;
+  padding:20px;
+}
+.bot-msg{background:#eee;padding:10px;margin:5px;border-radius:10px;}
+.user-msg{background:#2980b9;color:white;padding:10px;margin:5px;border-radius:10px;text-align:right;}
