@@ -3,20 +3,24 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from passlib.context import CryptContext
+from starlette.middleware.sessions import SessionMiddleware
+
 
 from database import get_db
 from chatbot_data import CHATBOT_DATA
 
 app = FastAPI(debug=True)
 
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-pwd = CryptContext(
-    schemes=["argon2"],
-    deprecated="auto"
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="super-secret-urcw-key"
 )
+
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+pwd = CryptContext(schemes=["argon2"], deprecated="auto")
 
 @app.get("/", response_class=HTMLResponse)
 def login_page(request: Request):
@@ -54,18 +58,43 @@ def register(
 
 
 @app.post("/login")
-def login(email: str = Form(...), password: str = Form(...)):
+def login(
+    request: Request,
+    identifier: str = Form(...),  # username OR email
+    password: str = Form(...)
+):
     db = get_db()
-    cur = db.cursor()
-    cur.execute("SELECT * FROM users WHERE email=%s", (email,))
+    cur = db.cursor(dictionary=True)
+
+    cur.execute(
+        "SELECT * FROM users WHERE email=%s OR username=%s",
+        (identifier, identifier)
+    )
     user = cur.fetchone()
+
     cur.close()
     db.close()
 
-    if user and pwd.verify(password, user[3]):
-        return RedirectResponse("/dashboard", status_code=302)
+    # ❌ No user found
+    if not user:
+        return RedirectResponse("/", status_code=303)
 
-    return RedirectResponse("/", status_code=302)
+    # 🔐 Password check (argon2-safe)
+    try:
+        if not pwd.verify(password, user["password"]):
+            return RedirectResponse("/", status_code=303)
+    except Exception:
+        return RedirectResponse("/", status_code=303)
+
+    # ✅ Store user in session
+    request.session["user"] = {
+        "name": user["name"],
+        "username": user["username"],
+        "email": user["email"]
+    }
+
+    return RedirectResponse("/dashboard", status_code=303)
+
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request):
