@@ -7,7 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 
 from database import get_db
-from chatbot_data import CHATBOT_DATA
+from chatbot_data import CHATBOT_DATA, WEBSITE1
 
 app = FastAPI(debug=True)
 
@@ -29,7 +29,7 @@ def get_bot_response(message: str):
         if keyword in message:
             return response
 
-    return "Invalid option"
+    return WEBSITE1
 
 @app.post("/chat")
 def chat(message: str = Form(...)):
