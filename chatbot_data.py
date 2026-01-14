@@ -76,8 +76,8 @@ HOSTEL = (
 
 WEBSITE1 = (
     "<b>For More Details</b><br><br>"
-    "Please visit the official website:<br>"
-    "https://umayalwomenscollege.co.in/"
+    "Please visit the official website for more details<br>"
+    "Link: https://umayalwomenscollege.co.in/"
 )
 
 WEBSITE2 = (
@@ -270,9 +270,11 @@ CHATBOT_DATA = {
     "address": CONTACT,
 
     # Website
-    "website": WEBSITE1,
-    "official website": WEBSITE1,
-    "college website": WEBSITE1,
-    "url": WEBSITE2
+    "website": WEBSITE2,
+    "official website": WEBSITE2,
+    "college website": WEBSITE2,
+    "url": WEBSITE2,
+    "link": WEBSITE2
+    
 }
 
