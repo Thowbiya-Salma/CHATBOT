@@ -121,3 +121,4 @@ def logout(request: Request):
 @app.get("/", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
