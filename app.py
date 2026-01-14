@@ -47,29 +47,28 @@ def register_page(request: Request):
 
 @app.post("/register")
 def register(
+    request: Request,
     name: str = Form(...),
+    username: str = Form(...),
     email: str = Form(...),
     password: str = Form(...)
 ):
-    # 🔐 sanitize password for bcrypt
-    password = password.strip()
-
-    if len(password.encode("utf-8")) > 72:
-        password = password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+    db = get_db()
+    cur = db.cursor()
 
     hashed_password = pwd.hash(password)
 
-    db = get_db()
-    cur = db.cursor()
     cur.execute(
-        "INSERT INTO users (name, email, password) VALUES (%s,%s,%s)",
-        (name, email, hashed_password)
+        "INSERT INTO users (name, username, email, password) VALUES (%s, %s, %s, %s)",
+        (name, username, email, hashed_password)
     )
+
     db.commit()
     cur.close()
     db.close()
 
-    return RedirectResponse("/", status_code=302)
+    return RedirectResponse("/", status_code=303)
+
 
 
 @app.post("/login")
