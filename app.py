@@ -22,6 +22,21 @@ templates = Jinja2Templates(directory="templates")
 
 pwd = CryptContext(schemes=["argon2"], deprecated="auto")
 
+def get_bot_response(message: str):
+    message = message.lower().strip()
+
+    for keyword, response in CHATBOT_DATA.items():
+        if keyword in message:
+            return response
+
+    return "Invalid option"
+
+@app.post("/chat")
+def chat(message: str = Form(...)):
+    reply = get_bot_response(message)
+    return {"reply": reply}
+
+
 @app.get("/", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -109,9 +124,7 @@ def dashboard(request: Request):
     )
 
 
-@app.post("/chat")
-def chat(message: str = Form(...)):
-    return {"reply": CHATBOT_DATA.get(message.lower(), "Invalid option")}
+
 
 @app.get("/logout")
 def logout(request: Request):
