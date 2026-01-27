@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DR.URCW Bot</title>
+<title>Dr. URCW Bot</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Bootstrap & Icons -->
+<!-- Bootstrap & Fonts -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -68,7 +68,6 @@ body{
   border-bottom:1px solid #ddd;
   display:flex;
   align-items:center;
-  justify-content:space-between;
 }
 .chat-header img{
   width:45px;
@@ -132,8 +131,8 @@ body{
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png">
-    <h5>DR.URCW BOT</h5>
+    <img src="/static/images_ss/college_logo.png" width="80">
+    <h5>Dr. URCW Bot</h5>
     <small>Dr. Umayal Ramanathan<br>College for Women</small>
 
     <div class="toggle form-check form-switch mt-4">
@@ -141,16 +140,16 @@ body{
       <label class="form-check-label">Dark Mode</label>
     </div>
 
-    <a href="/" class="btn btn-light btn-sm mt-4 w-100">Logout</a>
+    <a href="/logout" class="btn btn-light btn-sm mt-4 w-100">Logout</a>
   </div>
 
   <!-- CHAT AREA -->
   <div class="chat-area">
     <div class="chat-header">
       <div class="d-flex align-items-center gap-2">
-        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png">
+        <img src="/static/images_ss/college_logo.png" width="45">
         <div>
-          <strong>DR.URCW Bot</strong><br>
+          <strong>Dr. URCW Bot</strong><br>
           <small class="text-muted">Online</small>
         </div>
       </div>
@@ -158,18 +157,20 @@ body{
 
     <div class="chat-body" id="chat">
       <div class="msg bot">
-        Hi 👋 Welcome to <b>DR.URCW BOT</b><br><br>
-        Choose one option:<br>
-        1️⃣ Student Section<br>
-        2️⃣ Faculty Section<br>
-        3️⃣ Parent Section<br>
-        4️⃣ Visitor Section
+        👋 <b>Welcome to Dr. Umayal Ramanathan College for Women</b><br><br>
+        You can ask me about:<br>
+        • Admissions<br>
+        • Courses & Programmes<br>
+        • Placements<br>
+        • Hostel & Facilities<br>
+        • Library<br>
+        • Contact details
         <div class="time">now</div>
       </div>
     </div>
 
     <form class="chat-input" id="chatForm">
-      <input id="msg" placeholder="Type 1, 1.1, hi..." required>
+      <input id="msg" placeholder="Ask me anything about Dr. URCW..." required>
       <button class="btn btn-primary">Send</button>
     </form>
   </div>
@@ -180,27 +181,36 @@ body{
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 function timeNow(){
-  const d=new Date();
-  return d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0');
+  const d = new Date();
+  return d.getHours().toString().padStart(2,'0') + ":" +
+         d.getMinutes().toString().padStart(2,'0');
 }
 
 $("#chatForm").submit(function(e){
   e.preventDefault();
-  let msg=$("#msg").val().trim();
+  let msg = $("#msg").val().trim();
   if(!msg) return;
 
-  $("#chat").append(`<div class="msg user">${msg}<div class="time">${timeNow()}</div></div>`);
+  $("#chat").append(
+    `<div class="msg user">${msg}<div class="time">${timeNow()}</div></div>`
+  );
+
   $("#msg").val("");
-  $("#chat").append(`<div class="typing" id="typing">Bot is typing...</div>`);
+  $("#chat").append(
+    `<div class="typing" id="typing">Dr. URCW Bot is typing...</div>`
+  );
+
   $("#chat").scrollTop($("#chat")[0].scrollHeight);
 
   setTimeout(()=>{
-    $.post("/chat",{message:msg},function(data){
+    $.post("/chat", { message: msg }, function(data){
       $("#typing").remove();
-      $("#chat").append(`<div class="msg bot">${data.reply}<div class="time">${timeNow()}</div></div>`);
+      $("#chat").append(
+        `<div class="msg bot">${data.reply}<div class="time">${timeNow()}</div></div>`
+      );
       $("#chat").scrollTop($("#chat")[0].scrollHeight);
     });
-  },800);
+  }, 600);
 });
 
 // Dark mode
