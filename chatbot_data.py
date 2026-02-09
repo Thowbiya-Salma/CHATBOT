@@ -102,7 +102,7 @@ INTENTS = [
 
     {
         "name": "programmes",
-        "keywords": ["program", "programme", "courses", "programs offered"],
+        "keywords": ["academics","program", "programme", "courses", "programs offered"],
         "response": PROGRAMS_OFFERED
     },
 
