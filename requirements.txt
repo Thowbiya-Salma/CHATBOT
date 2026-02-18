@@ -2,7 +2,10 @@ fastapi
 uvicorn
 jinja2
 python-multipart
-mysql-connector-python
+sqlalchemy
+pymysql
 passlib[argon2]
-argon2-cffi
+python-dotenv
 itsdangerous
+scikit-learn
+rapidfuzz

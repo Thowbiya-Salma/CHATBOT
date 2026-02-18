@@ -1,0 +1,243 @@
+:root{
+  --primary:#2563eb;
+  --bg:#f3f6fb;
+  --sidebar:#1e293b;
+  --card:#ffffff;
+  --bot:#eef2ff;
+  --text:#0f172a;
+  --border:#e5e7eb;
+}
+
+/* Dark Mode Variables */
+body.dark{
+  --bg:#121212;
+  --sidebar:#0f172a;
+  --card:#1e1e1e;
+  --bot:#1f2937;
+  --text:#f3f4f6;
+  --border:#2d3748;
+}
+
+body{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  transition:0.3s ease;
+}
+
+.wrapper{
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar{
+  width:280px;
+  background:var(--sidebar);
+  color:white;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  transition:0.3s;
+}
+
+.sidebar h5{
+  font-weight:600;
+  margin-bottom:15px;
+}
+
+.chat-list{
+  flex:1;
+  overflow-y:auto;
+  margin-top:20px;
+  padding-right:5px;
+}
+
+/* Scrollbar */
+.chat-list::-webkit-scrollbar{
+  width:6px;
+}
+
+.chat-list::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.3);
+  border-radius:10px;
+}
+
+.chat-list a{
+  display:block;
+  padding:10px 12px;
+  border-radius:10px;
+  text-decoration:none;
+  color:white;
+  margin-bottom:8px;
+  transition:0.2s;
+  font-size:14px;
+}
+
+.chat-list a:hover{
+  background:rgba(255,255,255,0.1);
+}
+
+.active-chat{
+  background:rgba(255,255,255,0.25);
+  font-weight:600;
+}
+
+/* Rename & Delete Icons */
+.chat-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* ================= CHAT AREA ================= */
+
+.chat-area{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-header{
+  padding:15px 25px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  font-weight:600;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.chat-body{
+  flex:1;
+  padding:30px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-body::-webkit-scrollbar{
+  width:6px;
+}
+
+.chat-body::-webkit-scrollbar-thumb{
+  background:#ccc;
+  border-radius:10px;
+}
+
+/* ================= MESSAGES ================= */
+
+.message{
+  max-width:70%;
+  padding:14px 18px;
+  border-radius:18px;
+  margin-bottom:15px;
+  animation:fadeIn 0.2s ease-in-out;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.user{
+  background:var(--primary);
+  color:white;
+  align-self:flex-end;
+}
+
+.bot{
+  background:var(--bot);
+  align-self:flex-start;
+}
+
+.time{
+  font-size:11px;
+  opacity:0.6;
+  margin-top:5px;
+}
+
+/* ================= INPUT ================= */
+
+.chat-input{
+  padding:15px 25px;
+  background:var(--card);
+  display:flex;
+  gap:10px;
+  border-top:1px solid var(--border);
+}
+
+.chat-input input{
+  flex:1;
+  border-radius:25px;
+  padding:12px 18px;
+  border:1px solid #ddd;
+  outline:none;
+}
+
+.chat-input button{
+  border-radius:25px;
+  padding:10px 20px;
+  background:var(--primary);
+  color:white;
+  border:none;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.chat-input button:hover{
+  opacity:0.9;
+}
+
+.typing{
+  font-size:13px;
+  opacity:0.7;
+  margin-bottom:10px;
+}
+
+/* ================= CARDS ================= */
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:15px;
+  transition:0.3s;
+}
+
+/* ================= ADMIN TABLE ================= */
+
+table{
+  background:var(--card);
+}
+
+table th{
+  background:var(--primary);
+  color:white;
+}
+
+/* ================= MODAL ================= */
+
+.modal-content{
+  background:var(--card);
+  color:var(--text);
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(5px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width:768px){
+  .sidebar{
+    width:220px;
+  }
+
+  .message{
+    max-width:85%;
+  }
+}
