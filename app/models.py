@@ -1,22 +1,33 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
 
 
-# ================= USER =================
+# ================= ADMIN =================
 
-class User(Base):
-    __tablename__ = "users"
+class Admin(Base):
+    __tablename__ = "admins"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
     username = Column(String(100), unique=True)
     email = Column(String(100), unique=True)
     password = Column(String(255))
-    role = Column(String(50), default="user")
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    sessions = relationship("ChatSession", back_populates="user", cascade="all, delete")
+
+# ================= STUDENT =================
+
+class Student(Base):
+    __tablename__ = "students"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    username = Column(String(100), unique=True)
+    email = Column(String(100), unique=True)
+    password = Column(String(255))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 # ================= CHAT SESSION =================
@@ -25,12 +36,10 @@ class ChatSession(Base):
     __tablename__ = "chat_sessions"
 
     id = Column(Integer, primary_key=True)
+    user_type = Column(String(20))  # 'student'
+    user_id = Column(Integer)
     title = Column(String(255), default="New Chat")
-    user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
-
-    user = relationship("User", back_populates="sessions")
-    messages = relationship("ChatMessage", back_populates="session", cascade="all, delete")
 
 
 # ================= CHAT MESSAGE =================
@@ -39,13 +48,12 @@ class ChatMessage(Base):
     __tablename__ = "chat_history"
 
     id = Column(Integer, primary_key=True)
+    user_type = Column(String(20))  # 'student'
     user_id = Column(Integer)
-    session_id = Column(Integer, ForeignKey("chat_sessions.id"))
-    sender = Column(String(20))
+    session_id = Column(Integer)
+    sender = Column(String(20))  # 'user' or 'bot'
     message = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
-
-    session = relationship("ChatSession", back_populates="messages")
 
 
 # ================= UNANSWERED QUESTIONS =================
@@ -53,12 +61,17 @@ class ChatMessage(Base):
 class UnansweredQuestion(Base):
     __tablename__ = "unanswered_questions"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("students.id"))
     question = Column(Text)
+    keyword = Column(String(255), nullable=True)   # NEW
+    admin_answer = Column(Text, nullable=True)
+    answered = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    student = relationship("Student")
 
-# ================= INTENT STATS =================
+# ================= INTENT STATISTICS =================
 
 class IntentStat(Base):
     __tablename__ = "intent_stats"

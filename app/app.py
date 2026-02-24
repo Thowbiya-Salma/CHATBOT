@@ -4,17 +4,23 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func
+from sqlalchemy import or_
 
 from app.database import Base, engine, get_db
-from app.models import User, ChatSession, ChatMessage, UnansweredQuestion, IntentStat
+from app.models import (
+    Admin,
+    Student,
+    ChatSession,
+    ChatMessage,
+    UnansweredQuestion,
+    IntentStat
+)
 from app.auth import hash_password, verify_password
-from app.chat import generate_reply, generate_title
+from app.chat import generate_reply
 from app.config import SECRET_KEY
 from app.utils import create_chat_session
 
 app = FastAPI()
-
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 Base.metadata.create_all(bind=engine)
@@ -31,29 +37,39 @@ def login_page(request: Request):
 
 
 @app.post("/login")
-def login(request: Request,
-          identifier: str = Form(...),
-          password: str = Form(...),
-          db: Session = Depends(get_db)):
+def login(
+    request: Request,
+    role: str = Form(...),
+    identifier: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
 
-    user = db.query(User).filter(
-        or_(User.username == identifier, User.email == identifier)
-    ).first()
+    if role == "admin":
+        user = db.query(Admin).filter(
+            or_(Admin.username == identifier, Admin.email == identifier)
+        ).first()
+    else:
+        user = db.query(Student).filter(
+            or_(Student.username == identifier, Student.email == identifier)
+        ).first()
 
     if not user or not verify_password(password, user.password):
         return templates.TemplateResponse(
             "login.html",
-            {"request": request, "error": "Invalid username or password"}
+            {"request": request, "error": "Invalid credentials"}
         )
 
     request.session["user"] = {
         "id": user.id,
         "name": user.name,
-        "email": user.email,
-        "role": user.role
+        "role": role
     }
 
-    return RedirectResponse("/dashboard", status_code=303)
+    return RedirectResponse(
+        "/admin" if role == "admin" else "/dashboard",
+        status_code=303
+    )
 
 
 # ================= REGISTER =================
@@ -64,24 +80,29 @@ def register_page(request: Request):
 
 
 @app.post("/register")
-def register(request: Request,
-             name: str = Form(...),
-             username: str = Form(...),
-             email: str = Form(...),
-             password: str = Form(...),
-             db: Session = Depends(get_db)):
+def register(
+    request: Request,
+    name: str = Form(...),
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    role: str = Form(...),
+    db: Session = Depends(get_db)
+):
 
-    existing_user = db.query(User).filter(
-        or_(User.username == username, User.email == email)
+    model = Admin if role == "admin" else Student
+
+    existing = db.query(model).filter(
+        or_(model.username == username, model.email == email)
     ).first()
 
-    if existing_user:
+    if existing:
         return templates.TemplateResponse(
             "register.html",
             {"request": request, "error": "Username or Email already exists"}
         )
 
-    new_user = User(
+    new_user = model(
         name=name,
         username=username,
         email=email,
@@ -94,79 +115,115 @@ def register(request: Request,
     return RedirectResponse("/", status_code=303)
 
 
-# ================= DASHBOARD =================
+# ================= STUDENT DASHBOARD =================
 
 @app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request, db: Session = Depends(get_db)):
+def dashboard(
+    request: Request,
+    page: int = 1,
+    search: str = "",
+    db: Session = Depends(get_db)
+):
 
     if "user" not in request.session:
         return RedirectResponse("/", status_code=303)
 
-    user_id = request.session["user"]["id"]
+    if request.session["user"]["role"] != "student":
+        return RedirectResponse("/", status_code=303)
 
-    sessions = db.query(ChatSession)\
-                 .filter(ChatSession.user_id == user_id)\
-                 .order_by(ChatSession.created_at.desc())\
-                 .all()
+    user_data = request.session["user"]
+    user_id = user_data["id"]
 
-    total_sessions = len(sessions)
+    PER_PAGE = 5
 
-    total_messages = db.query(ChatMessage)\
-                        .filter(ChatMessage.user_id == user_id)\
-                        .count()
+    # -------- BASE QUERY --------
+    query = db.query(ChatSession).filter(
+        ChatSession.user_id == user_id,
+        ChatSession.user_type == "student"
+    )
 
-    unanswered_count = db.query(UnansweredQuestion).count()
+    # -------- SEARCH FILTER --------
+    if search:
+        query = query.filter(ChatSession.title.ilike(f"%{search}%"))
 
-    popular_intents = db.query(IntentStat)\
-                        .order_by(IntentStat.count.desc())\
-                        .limit(5)\
-                        .all()
+    total_sessions = query.count()
+
+    sessions = (
+        query
+        .order_by(ChatSession.created_at.desc())
+        .offset((page - 1) * PER_PAGE)
+        .limit(PER_PAGE)
+        .all()
+    )
+
+    # -------- ATTACH LAST MESSAGE PREVIEW --------
+    session_data = []
+
+    for s in sessions:
+        last_message = (
+            db.query(ChatMessage)
+            .filter(ChatMessage.session_id == s.id)
+            .order_by(ChatMessage.created_at.desc())
+            .first()
+        )
+
+        session_data.append({
+            "id": s.id,
+            "title": s.title,
+            "created_at": s.created_at,
+            "last_message": last_message.message[:60] + "..." if last_message else "No messages yet"
+        })
+
+    total_messages = (
+        db.query(ChatMessage)
+        .filter(
+            ChatMessage.user_id == user_id,
+            ChatMessage.user_type == "student"
+        )
+        .count()
+    )
+
+    total_pages = (total_sessions + PER_PAGE - 1) // PER_PAGE
 
     return templates.TemplateResponse(
         "dashboard.html",
         {
             "request": request,
-            "user": request.session["user"],
-            "sessions": sessions,
+            "user": user_data,
+            "sessions": session_data,
             "total_sessions": total_sessions,
             "total_messages": total_messages,
-            "unanswered_count": unanswered_count,
-            "popular_intents": popular_intents
+            "page": page,
+            "total_pages": total_pages,
+            "search": search
         }
     )
 
-# ================= CHAT =================
+# ================= CHATBOT =================
 
 @app.get("/chatbot", response_class=HTMLResponse)
 def chatbot_page(request: Request,
                  session_id: int | None = None,
                  db: Session = Depends(get_db)):
 
-    if "user" not in request.session:
+    if "user" not in request.session or request.session["user"]["role"] != "student":
         return RedirectResponse("/", status_code=303)
 
     user_id = request.session["user"]["id"]
 
     if session_id is None:
-        session_id = create_chat_session(db, user_id)
-
-    session = db.query(ChatSession)\
-                .filter(ChatSession.id == session_id,
-                        ChatSession.user_id == user_id)\
-                .first()
-
-    if not session:
-        return RedirectResponse("/dashboard", status_code=303)
+        session_id = create_chat_session(db, user_id, "student")
 
     sessions = db.query(ChatSession)\
-                 .filter(ChatSession.user_id == user_id)\
-                 .order_by(ChatSession.created_at.desc())\
-                 .all()
+        .filter(ChatSession.user_id == user_id,
+                ChatSession.user_type == "student")\
+        .order_by(ChatSession.created_at.desc())\
+        .all()
 
     messages = db.query(ChatMessage)\
-                 .filter(ChatMessage.session_id == session_id)\
-                 .order_by(ChatMessage.created_at.asc())\
-                 .all()
+        .filter(ChatMessage.session_id == session_id)\
+        .order_by(ChatMessage.created_at.asc())\
+        .all()
 
     request.session["active_chat"] = session_id
 
@@ -187,128 +244,164 @@ def chat(request: Request,
          message: str = Form(...),
          db: Session = Depends(get_db)):
 
-    if "user" not in request.session:
-        return JSONResponse({"reply": "Session expired. Please login again."})
+    if "user" not in request.session or request.session["user"]["role"] != "student":
+        return JSONResponse({"reply": "Unauthorized access."})
 
     user_id = request.session["user"]["id"]
     session_id = request.session.get("active_chat")
 
     if not session_id:
-        session_id = create_chat_session(db, user_id)
+        session_id = create_chat_session(db, user_id, "student")
 
-    user_msg = ChatMessage(
+    # -------- SAVE USER MESSAGE --------
+    db.add(ChatMessage(
+        user_type="student",
         user_id=user_id,
         session_id=session_id,
         sender="user",
         message=message
-    )
-    db.add(user_msg)
+    ))
     db.commit()
 
-    history = db.query(ChatMessage)\
-                .filter(ChatMessage.session_id == session_id)\
-                .order_by(ChatMessage.created_at.asc())\
-                .all()
+    # -------- CHECK TRAINED KEYWORDS FIRST --------
+    cleaned_message = message.lower().strip()
 
-    reply = generate_reply(history)
+    trained_match = db.query(UnansweredQuestion).filter(
+        UnansweredQuestion.keyword == cleaned_message,
+        UnansweredQuestion.answered == True
+    ).first()
 
-    bot_msg = ChatMessage(
+    if trained_match:
+        reply = trained_match.admin_answer
+    else:
+        history = db.query(ChatMessage)\
+            .filter(ChatMessage.session_id == session_id)\
+            .order_by(ChatMessage.created_at.asc())\
+            .all()
+
+        reply = generate_reply(history, db, user_id)
+
+    # -------- SAVE BOT REPLY --------
+    db.add(ChatMessage(
+        user_type="student",
         user_id=user_id,
         session_id=session_id,
         sender="bot",
         message=reply
-    )
-    db.add(bot_msg)
+    ))
     db.commit()
-
-    if len(history) == 1:
-        title = generate_title(message)
-        session = db.query(ChatSession)\
-                    .filter(ChatSession.id == session_id)\
-                    .first()
-        if session:
-            session.title = title
-            db.commit()
 
     return JSONResponse({"reply": reply})
 
 
-# ================= RENAME =================
+# ================= RENAME SESSION =================
 
-@app.post("/rename_chat/{session_id}")
-def rename_chat(session_id: int,
-                title: str = Form(...),
-                request: Request = None,
-                db: Session = Depends(get_db)):
+@app.post("/rename-session")
+def rename_session(request: Request,
+                   session_id: int = Form(...),
+                   new_title: str = Form(...),
+                   db: Session = Depends(get_db)):
 
-    user_id = request.session["user"]["id"]
+    if "user" not in request.session:
+        return RedirectResponse("/", status_code=303)
 
-    session = db.query(ChatSession)\
-                .filter(ChatSession.id == session_id,
-                        ChatSession.user_id == user_id)\
-                .first()
+    session = db.query(ChatSession).filter(
+        ChatSession.id == session_id,
+        ChatSession.user_id == request.session["user"]["id"],
+        ChatSession.user_type == "student"
+    ).first()
 
     if session:
-        session.title = title
+        session.title = new_title.strip()
         db.commit()
 
-    return RedirectResponse(f"/chatbot?session_id={session_id}", status_code=303)
+    return RedirectResponse(request.headers.get("referer", "/dashboard"), status_code=303)
 
 
-# ================= DELETE =================
+# ================= DELETE SESSION =================
 
-@app.get("/delete_chat/{session_id}")
-def delete_chat(session_id: int,
-                request: Request,
-                db: Session = Depends(get_db)):
+@app.post("/delete-session")
+def delete_session(request: Request,
+                   session_id: int = Form(...),
+                   db: Session = Depends(get_db)):
 
-    user_id = request.session["user"]["id"]
+    if "user" not in request.session:
+        return RedirectResponse("/", status_code=303)
 
     db.query(ChatMessage)\
-      .filter(ChatMessage.session_id == session_id)\
-      .delete()
+        .filter(ChatMessage.session_id == session_id)\
+        .delete()
 
     db.query(ChatSession)\
-      .filter(ChatSession.id == session_id,
-              ChatSession.user_id == user_id)\
-      .delete()
+        .filter(ChatSession.id == session_id)\
+        .delete()
 
     db.commit()
 
     return RedirectResponse("/dashboard", status_code=303)
 
 
-# ================= ADMIN =================
+# ================= ADMIN DASHBOARD =================
 
 @app.get("/admin", response_class=HTMLResponse)
-def admin_panel(request: Request, db: Session = Depends(get_db)):
+def admin_dashboard(request: Request, db: Session = Depends(get_db)):
 
     if "user" not in request.session or request.session["user"]["role"] != "admin":
-        return RedirectResponse("/dashboard", status_code=303)
+        return RedirectResponse("/", status_code=303)
 
-    unanswered = db.query(UnansweredQuestion)\
-                   .order_by(UnansweredQuestion.created_at.desc())\
-                   .all()
-
-    popular_intents = db.query(IntentStat)\
-                        .order_by(IntentStat.count.desc())\
-                        .all()
-
-    total_users = db.query(User).count()
+    total_students = db.query(Student).count()
     total_sessions = db.query(ChatSession).count()
     total_messages = db.query(ChatMessage).count()
+    unanswered_count = db.query(UnansweredQuestion).filter_by(answered=False).count()
+
+    # ✅ Correct join using user_id + user_type
+    search_history = (
+        db.query(ChatMessage, Student)
+        .join(Student, ChatMessage.user_id == Student.id)
+        .filter(ChatMessage.user_type == "student")
+        .order_by(ChatMessage.created_at.desc())
+        .all()
+    )
+
+    unanswered = (
+        db.query(UnansweredQuestion)
+        .filter_by(answered=False)
+        .order_by(UnansweredQuestion.created_at.desc())
+        .all()
+    )
 
     return templates.TemplateResponse(
         "admin.html",
         {
             "request": request,
-            "unanswered": unanswered,
-            "popular_intents": popular_intents,
-            "total_users": total_users,
+            "total_students": total_students,
             "total_sessions": total_sessions,
-            "total_messages": total_messages
+            "total_messages": total_messages,
+            "unanswered_count": unanswered_count,
+            "search_history": search_history,
+            "unanswered": unanswered
         }
     )
+
+# ================= ADMIN ANSWER =================
+
+@app.post("/admin/answer/{qid}")
+def answer_unanswered(
+    qid: int,
+    keyword: str = Form(...),
+    answer: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    question = db.query(UnansweredQuestion).filter_by(id=qid).first()
+
+    if question:
+        question.keyword = keyword.lower().strip()
+        question.admin_answer = answer
+        question.answered = True
+        db.commit()
+
+    return RedirectResponse("/admin", status_code=303)
+
 
 # ================= LOGOUT =================
 
