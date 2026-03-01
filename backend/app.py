@@ -110,6 +110,14 @@ def health_check():
         "environment": APP_ENV
     }
 
+@app.get("/favicon.ico")
+async def favicon():
+    from fastapi.responses import FileResponse
+    favicon_path = os.path.join(PROJECT_ROOT, "frontend", "static", "favicon.ico")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path)
+    return {"detail": "Not found"}
+
 # ===============================
 # STARTUP EVENT
 # ===============================

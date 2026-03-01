@@ -35,7 +35,7 @@
     <div style="position:relative;">
 
         <div class="profile-trigger"
-             onclick="toggleProfileDropdown()"
+             onclick="window.location.href='/profile';"
              style="display:flex; align-items:center; cursor:pointer; padding:8px 12px; border-radius:12px; transition:var(--transition);">
 
             <img id="navbar-profile-img"
@@ -111,10 +111,6 @@
 </style>
 
 <script>
-function toggleProfileDropdown() {
-    document.getElementById('profile-dropdown').classList.toggle('show');
-}
-
 // Close dropdown when clicking outside
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.profile-trigger') && !e.target.closest('.profile-dropdown')) {

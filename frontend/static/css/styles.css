@@ -359,14 +359,15 @@ body {
 }
 
 .message.student {
-    background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
-    color: var(--text-dark);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
     margin-left: auto;
 }
 
 .message.bot {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color: white;
+    background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+    color: var(--text-dark);
+    margin-right: auto;
 }
 
 .chat-input-wrapper {

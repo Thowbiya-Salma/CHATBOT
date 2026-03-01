@@ -1,13 +1,6 @@
+create urcw_bot;
 use urcw_bot;
 show tables;
-drop table users;
-drop table student_profiles;
-drop table admin_profiles;
-drop table chat_sessions;
-drop table unanswered_questions;
-drop table messages;    
-drop table knowledge_base;
-drop table notifications;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,

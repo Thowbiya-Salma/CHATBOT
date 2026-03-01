@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from backend.database import get_db
 from backend.models import ChatSession, Message, User
-from backend.chat_engine import generate_reply, generate_title
+from backend.chat_engine import get_bot_response, generate_title
 from backend.utils import create_chat_session
 
 router = APIRouter()
@@ -127,13 +127,8 @@ def send_message(
         session.title = generate_title(message)
         db.commit()
 
-    # ---------- FETCH FULL HISTORY ----------
-    history = db.query(Message).filter(
-        Message.session_id == session_id
-    ).order_by(Message.created_at.asc()).all()
-
     # ---------- GENERATE BOT REPLY ----------
-    reply_text = generate_reply(history, db, user_id)
+    reply_text = get_bot_response(message, user_id, db)
 
     bot_message = Message(
         session_id=session_id,
