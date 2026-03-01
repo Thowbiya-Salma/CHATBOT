@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ page_title if page_title else "DR. URCW AI" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- GOOGLE FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- GLOBAL STYLES -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+</head>
+
+<body>
+
+    <!-- ======================================================
+         MAIN LAYOUT CONTAINER
+    ======================================================= -->
+    <div class="layout">
+
+        <!-- ===============================
+             SIDEBAR (ROLE BASED)
+        ================================ -->
+        {% if user.role == "admin" %}
+            {% include "components/sidebar_admin.html" %}
+        {% else %}
+            {% include "components/sidebar_student.html" %}
+        {% endif %}
+
+
+        <!-- ===============================
+             RIGHT SIDE CONTENT AREA
+        ================================ -->
+        <div style="flex:1; display:flex; flex-direction:column;">
+
+            <!-- NAVBAR -->
+            {% include "components/navbar.html" %}
+
+            <!-- PAGE CONTENT -->
+            <div style="flex:1; overflow-y:auto;">
+                {% block content %}
+                {% endblock %}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- GLOBAL JS -->
+    <script src="/static/js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="main-content">
+
+    <!-- ===============================
+         PAGE HEADER
+    ================================ -->
+    <div style="margin-bottom:30px;">
+        <h1 style="font-size:24px; font-weight:600;">Admin Profile</h1>
+        <p style="color:var(--text-muted); margin-top:5px;">
+            Manage your account information
+        </p>
+    </div>
+
+
+    <!-- ===============================
+         PROFILE CARD
+    ================================ -->
+
+    <div class="card profile-card">
+
+        <form method="POST" action="/profile/update" enctype="multipart/form-data" style="max-width:650px; margin:0 auto;">
+
+            <!-- PROFILE IMAGE -->
+            <div class="profile-img-wrapper" style="margin-bottom:30px; text-align:center;">
+
+                <img id="profile-preview"
+                     src="{{ profile.profile_image if profile and profile.profile_image else '/static/images/logo.png' }}"
+                     class="profile-img">
+
+                <label class="profile-edit-icon">
+                    ✏
+                    <input type="file" name="profile_image" id="profile-input" accept="image/*" style="display:none;">
+                </label>
+
+            </div>
+
+
+            <!-- NAME -->
+            <div style="margin-bottom:15px; display:flex; align-items:center; gap:15px;">
+                <label style="min-width:120px; color:var(--text-muted); font-size:14px; text-align:left;">Name</label>
+                <input type="text"
+                       name="name"
+                       value="{{ user.name }}"
+                       required
+                       style="flex:1; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.5); color:var(--text-light);">
+            </div>
+
+
+            <!-- ROLE (LOCKED) -->
+            <div style="margin-bottom:15px; display:flex; align-items:center; gap:15px;">
+                <label style="min-width:120px; color:var(--text-muted); font-size:14px; text-align:left;">Role</label>
+                <input type="text"
+                       value="Admin"
+                       disabled
+                       style="flex:1; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); background:rgba(15,23,42,0.3); color:var(--text-muted);">
+            </div>
+
+
+            <!-- DEPARTMENT -->
+            <div style="margin-bottom:15px; display:flex; align-items:center; gap:15px;">
+                <label style="min-width:120px; color:var(--text-muted); font-size:14px; text-align:left;">Department</label>
+                <input type="text"
+                       name="department"
+                       placeholder="Enter Department"
+                       value="{{ profile.department if profile and profile.department else '' }}"
+                       style="flex:1; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.5); color:var(--text-light);">
+            </div>
+
+
+            <!-- PHONE -->
+            <div style="margin-bottom:15px; display:flex; align-items:center; gap:15px;">
+                <label style="min-width:120px; color:var(--text-muted); font-size:14px; text-align:left;">Phone Number</label>
+                <input type="text"
+                       name="phone"
+                       placeholder="Enter Phone Number"
+                       value="{{ profile.phone if profile and profile.phone else '' }}"
+                       style="flex:1; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.5); color:var(--text-light);">
+            </div>
+
+
+            <!-- PASSWORD CHANGE -->
+            <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:30px;">
+
+                <h4 style="margin-bottom:20px; color:var(--text-light);">Change Password</h4>
+
+                <div style="margin-bottom:15px;">
+                    <input type="password"
+                           name="current_password"
+                           placeholder="Current Password"
+                           style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.5); color:var(--text-light);">
+                </div>
+
+                <div style="margin-bottom:15px;">
+                    <input type="password"
+                           name="new_password"
+                           placeholder="New Password"
+                           style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.5); color:var(--text-light);">
+                </div>
+
+            </div>
+
+
+            <!-- SAVE BUTTON -->
+            <div style="margin-top:30px;">
+                <button type="submit"
+                        style="width:100%; padding:14px; border-radius:12px; border:none; background:linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color:white; font-weight:600; cursor:pointer; transition:var(--transition); box-shadow:0 4px 15px rgba(99,102,241,0.3);">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+
+
+        <!-- ===============================
+             DELETE ACCOUNT
+        ================================ -->
+
+        <div style="max-width:650px; margin:30px auto 0; padding-top:30px; border-top:1px solid rgba(239,68,68,0.3);">
+
+            <h3 style="color:var(--danger); margin-bottom:15px;">Danger Zone</h3>
+
+            <form method="POST" action="/profile/delete">
+
+                <input type="password"
+                       name="confirm_password"
+                       placeholder="Confirm your password to delete account"
+                       required
+                       style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(15,23,42,0.5); color:var(--text-light); margin-bottom:15px;">
+
+                <button type="submit"
+                        style="width:100%; padding:14px; border-radius:12px; border:none; background:var(--danger); color:white; font-weight:600; cursor:pointer; transition:var(--transition);">
+                    Delete Account
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.getElementById('profile-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('profile-preview').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+{% endblock %}

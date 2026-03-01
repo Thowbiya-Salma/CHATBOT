@@ -1,0 +1,151 @@
+<!-- ======================================================
+     GLOBAL NAVBAR COMPONENT
+======================================================= -->
+
+<div style="
+    height:70px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 30px;
+    background:var(--bg-card);
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+">
+
+    <!-- ===============================
+         LEFT SECTION (PAGE TITLE)
+    ================================ -->
+    <div style="display:flex; align-items:center; gap:20px;">
+        <h2 style="font-size:18px; font-weight:600; color:var(--text-light);">
+            {{ page_title if page_title else "Dashboard" }}
+        </h2>
+        
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" id="theme-toggle"
+                style="padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:var(--text-light); cursor:pointer; transition:var(--transition); font-size:18px;">
+            🌙
+        </button>
+    </div>
+
+
+    <!-- ===============================
+         RIGHT SECTION (PROFILE)
+    ================================ -->
+    <div style="position:relative;">
+
+        <div class="profile-trigger"
+             onclick="toggleProfileDropdown()"
+             style="display:flex; align-items:center; cursor:pointer; padding:8px 12px; border-radius:12px; transition:var(--transition);">
+
+            <img id="navbar-profile-img"
+                 src="/static/images/logo.png"
+                 style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:12px; border:2px solid var(--primary-light); box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+
+            <span style="font-size:14px; font-weight:500; color:var(--text-light);">
+                {{ user.name }}
+            </span>
+
+        </div>
+
+
+        <!-- DROPDOWN -->
+        <div id="profile-dropdown"
+             class="profile-dropdown"
+             style="
+                display:none;
+                position:absolute;
+                right:0;
+                top:60px;
+                background:var(--bg-card);
+                border-radius:12px;
+                padding:10px;
+                min-width:180px;
+                box-shadow:var(--shadow-soft);
+                z-index:100;
+                border:1px solid rgba(255,255,255,0.1);
+                animation:slideDown 0.3s ease-out;
+             ">
+
+            <a href="/profile"
+               style="display:block;
+                      padding:10px 12px;
+                      border-radius:8px;
+                      text-decoration:none;
+                      color:var(--text-light);
+                      transition:var(--transition);">
+                Profile
+            </a>
+
+            <a href="/logout"
+               style="display:block;
+                      padding:10px 12px;
+                      border-radius:8px;
+                      text-decoration:none;
+                      color:var(--danger);
+                      transition:var(--transition);">
+                Logout
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+@keyframes slideDown {
+    from { opacity:0; transform:translateY(-10px); }
+    to { opacity:1; transform:translateY(0); }
+}
+.profile-dropdown.show {
+    display:block !important;
+}
+.profile-dropdown a:hover {
+    background:rgba(99,102,241,0.1);
+    color:var(--primary-light);
+}
+.profile-trigger:hover {
+    background:rgba(99,102,241,0.05);
+}
+</style>
+
+<script>
+function toggleProfileDropdown() {
+    document.getElementById('profile-dropdown').classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.profile-trigger') && !e.target.closest('.profile-dropdown')) {
+        document.getElementById('profile-dropdown').classList.remove('show');
+    }
+});
+
+// Load profile image
+fetch('/api/profile-image')
+    .then(r => r.json())
+    .then(data => {
+        if (data.image) {
+            document.getElementById('navbar-profile-img').src = data.image;
+        }
+    })
+    .catch(() => {});
+
+// Theme Toggle
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.getElementById('theme-toggle').textContent = newTheme === 'light' ? '🌙' : '☀️';
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+if (document.getElementById('theme-toggle')) {
+    document.getElementById('theme-toggle').textContent = savedTheme === 'light' ? '🌙' : '☀️';
+}
+</script>

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="main-content">
+
+    <!-- ===============================
+         PAGE HEADER
+    ================================ -->
+    <div style="margin-bottom:30px;">
+        <h1 style="font-size:24px; font-weight:600;">
+            Welcome, {{ user.name }}
+        </h1>
+        <p style="color:var(--text-muted); margin-top:5px;">
+            Manage your conversations and explore campus assistance
+        </p>
+    </div>
+
+
+    <!-- ===============================
+         STATS CARDS
+    ================================ -->
+    <div class="stats-grid">
+
+        <div class="card">
+            <h3 style="color:var(--text-muted); font-size:14px;">
+                Total Chat Sessions
+            </h3>
+            <h2 style="margin-top:10px;">
+                {{ total_sessions }}
+            </h2>
+        </div>
+
+        <div class="card">
+            <h3 style="color:var(--text-muted); font-size:14px;">
+                Total Messages
+            </h3>
+            <h2 style="margin-top:10px;">
+                {{ total_messages }}
+            </h2>
+        </div>
+
+    </div>
+
+
+    <!-- ===============================
+         START NEW CHAT
+    ================================ -->
+    <div style="margin:30px 0;">
+        <a href="/chatbot"
+           style="display:inline-block;
+                  padding:12px 20px;
+                  background:var(--primary-light);
+                  color:white;
+                  border-radius:12px;
+                  text-decoration:none;
+                  font-weight:600;">
+            + Start New Chat
+        </a>
+    </div>
+
+
+    <!-- ===============================
+         RECENT CHATS SECTION
+    ================================ -->
+
+    <div class="card"
+         style="height:350px; overflow-y:auto;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="font-weight:600;">Recent Chats</h3>
+        </div>
+
+        {% if sessions %}
+            <div style="display:flex; flex-direction:column; gap:12px;">
+
+                {% for session in sessions %}
+
+                    <div style="padding:12px;
+                                border-radius:12px;
+                                background:#1E293B;
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:center;">
+
+                        <!-- Chat Title -->
+                        <a href="/chatbot?session_id={{ session.id }}"
+                           style="text-decoration:none; color:white; flex:1;">
+                            {{ session.title }}
+                        </a>
+
+                        <!-- Three Dot Menu -->
+                        <div style="position:relative;">
+
+                            <button style="background:none;
+                                           border:none;
+                                           color:var(--text-muted);
+                                           font-size:18px;
+                                           cursor:pointer;"
+                                    onclick="toggleMenu({{ session.id }})">
+                                ⋮
+                            </button>
+
+                            <div id="menu-{{ session.id }}"
+                                 style="display:none;
+                                        position:absolute;
+                                        right:0;
+                                        top:25px;
+                                        background:#1E293B;
+                                        padding:8px;
+                                        border-radius:8px;
+                                        box-shadow:var(--shadow-soft);
+                                        z-index:10;">
+
+                                <div class="rename-session"
+                                     data-id="{{ session.id }}"
+                                     style="padding:6px 10px;
+                                            cursor:pointer;">
+                                    Rename
+                                </div>
+
+                                <div class="delete-session"
+                                     data-id="{{ session.id }}"
+                                     style="padding:6px 10px;
+                                            cursor:pointer;
+                                            color:#EF4444;">
+                                    Delete
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+            <p style="color:var(--text-muted);">
+                No chat sessions yet. Start your first conversation.
+            </p>
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- ===============================
+     INLINE SCRIPT
+================================ -->
+<script>
+function toggleMenu(id) {
+    const menu = document.getElementById("menu-" + id);
+    if (menu.style.display === "none" || menu.style.display === "") {
+        document.querySelectorAll("[id^='menu-']").forEach(m => m.style.display = "none");
+        menu.style.display = "block";
+    } else {
+        menu.style.display = "none";
+    }
+}
+</script>
+
+{% endblock %}

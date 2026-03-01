@@ -1,0 +1,119 @@
+{% extends "auth_base.html" %}
+
+{% block content %}
+
+<div class="auth-card">
+
+    <!-- ===============================
+         LOGO
+    ================================ -->
+    <img src="/static/images/logo.png" alt="DR URCW Logo" class="auth-logo">
+
+    <h2>Welcome Back</h2>
+    <p style="color:var(--text-muted); margin-bottom:20px;">
+        Sign in to continue to DR. URCW AI
+    </p>
+
+    <!-- ===============================
+         ERROR MESSAGE
+    ================================ -->
+    {% if error %}
+        <div style="background:#7F1D1D;
+                    padding:10px;
+                    border-radius:8px;
+                    margin-bottom:15px;
+                    font-size:14px;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- ===============================
+         SUCCESS MESSAGE
+    ================================ -->
+    {% if success %}
+        <div style="background:#065F46;
+                    padding:12px;
+                    border-radius:8px;
+                    margin-bottom:15px;
+                    font-size:14px;
+                    border-left:4px solid #10B981;">
+            ✓ {{ success }}
+        </div>
+    {% endif %}
+
+    <!-- ===============================
+         LOGIN FORM
+    ================================ -->
+    <form method="POST" action="/login">
+
+        <!-- ROLE SELECTION -->
+        <select name="role"
+                class="auth-input"
+                style="background:#1E293B; color:white;"
+                required>
+            <option value="">Select Role</option>
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <!-- USERNAME OR EMAIL -->
+        <input type="text"
+               name="identifier"
+               class="auth-input"
+               placeholder="Username or Email"
+               required>
+
+        <!-- PASSWORD -->
+        <div style="position:relative;">
+            <input type="password"
+                   name="password"
+                   id="login-password"
+                   class="auth-input"
+                   placeholder="Password"
+                   required>
+
+            <span onclick="togglePassword('login-password')"
+                  style="position:absolute;
+                         right:12px;
+                         top:50%;
+                         transform:translateY(-50%);
+                         cursor:pointer;
+                         font-size:13px;
+                         color:var(--text-muted);">
+                Show
+            </span>
+        </div>
+
+        <!-- SUBMIT BUTTON -->
+        <button type="submit" class="auth-btn">
+            Sign In
+        </button>
+
+    </form>
+
+    <!-- ===============================
+         REGISTER LINK
+    ================================ -->
+    <p style="margin-top:20px; font-size:14px; color:var(--text-muted);">
+        Don’t have an account?
+        <a href="/register"
+           style="color:var(--primary-light); text-decoration:none;">
+            Create one
+        </a>
+    </p>
+
+</div>
+
+
+<!-- ===============================
+     PASSWORD TOGGLE SCRIPT
+================================ -->
+<script>
+function togglePassword(id) {
+    const input = document.getElementById(id);
+    const type = input.getAttribute("type") === "password" ? "text" : "password";
+    input.setAttribute("type", type);
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+<div class="chat-sidebar">
+
+    <!-- ===============================
+         HEADER
+    ================================ -->
+    <div style="margin-bottom:20px;">
+
+        <a href="/chatbot"
+           style="display:block;
+                  padding:10px;
+                  background:var(--primary-light);
+                  color:white;
+                  text-align:center;
+                  border-radius:10px;
+                  text-decoration:none;
+                  font-weight:600;">
+            + New Chat
+        </a>
+
+    </div>
+
+
+    <!-- ===============================
+         CHAT SESSIONS LIST
+    ================================ -->
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+
+        {% if sessions %}
+            {% for session in sessions %}
+
+                <div class="chat-session {% if session.id == active_session %}active{% endif %}"
+                     style="display:flex; justify-content:space-between; align-items:center;">
+
+                    <!-- Chat Title -->
+                    <a href="/chatbot?session_id={{ session.id }}"
+                       style="text-decoration:none; color:inherit; flex:1;">
+                        {{ session.title }}
+                    </a>
+
+                    <!-- Three Dot Menu -->
+                    <div style="position:relative; margin-left:8px;">
+
+                        <button style="background:none;
+                                       border:none;
+                                       color:var(--text-muted);
+                                       font-size:16px;
+                                       cursor:pointer;"
+                                onclick="toggleChatMenu({{ session.id }})">
+                            ⋮
+                        </button>
+
+                        <div id="chat-menu-{{ session.id }}"
+                             style="display:none;
+                                    position:absolute;
+                                    right:0;
+                                    top:22px;
+                                    background:#1E293B;
+                                    padding:6px;
+                                    border-radius:8px;
+                                    box-shadow:var(--shadow-soft);
+                                    z-index:10;">
+
+                            <div class="rename-session"
+                                 data-id="{{ session.id }}"
+                                 style="padding:6px 10px; cursor:pointer;">
+                                Rename
+                            </div>
+
+                            <div class="delete-session"
+                                 data-id="{{ session.id }}"
+                                 style="padding:6px 10px; cursor:pointer; color:#EF4444;">
+                                Delete
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+        {% else %}
+
+            <p style="color:var(--text-muted); text-align:center; margin-top:20px;">
+                No conversations yet.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<!-- ===============================
+     INLINE SCRIPT
+================================ -->
+<script>
+function toggleChatMenu(id) {
+    const menu = document.getElementById("chat-menu-" + id);
+
+    document.querySelectorAll("[id^='chat-menu-']").forEach(m => {
+        if (m.id !== "chat-menu-" + id) {
+            m.style.display = "none";
+        }
+    });
+
+    if (menu.style.display === "none" || menu.style.display === "") {
+        menu.style.display = "block";
+    } else {
+        menu.style.display = "none";
+    }
+}
+</script>

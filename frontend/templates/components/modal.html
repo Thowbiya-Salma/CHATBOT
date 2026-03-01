@@ -1,0 +1,79 @@
+<!-- ======================================================
+     REUSABLE MODAL COMPONENT
+======================================================= -->
+
+<div id="{{ modal_id }}"
+     class="modal"
+     style="
+        position:fixed;
+        inset:0;
+        display:none;
+        align-items:center;
+        justify-content:center;
+        background:rgba(0,0,0,0.6);
+        backdrop-filter:blur(6px);
+        z-index:1000;
+        transition:0.3s ease;
+     ">
+
+    <!-- MODAL BOX -->
+    <div style="
+            background:#1E293B;
+            width:100%;
+            max-width:500px;
+            border-radius:16px;
+            padding:25px;
+            box-shadow:0 10px 40px rgba(0,0,0,0.4);
+            position:relative;
+            animation:modalScale 0.25s ease;
+        ">
+
+        <!-- CLOSE BUTTON -->
+        <button data-close-modal
+                style="
+                    position:absolute;
+                    top:15px;
+                    right:15px;
+                    background:none;
+                    border:none;
+                    color:var(--text-muted);
+                    font-size:18px;
+                    cursor:pointer;
+                ">
+            ✕
+        </button>
+
+        <!-- MODAL TITLE -->
+        {% if modal_title %}
+            <h2 style="margin-bottom:15px; font-size:18px;">
+                {{ modal_title }}
+            </h2>
+        {% endif %}
+
+        <!-- MODAL CONTENT SLOT -->
+        <div>
+            {{ modal_content | safe }}
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ======================================================
+     MODAL ANIMATION STYLE
+======================================================= -->
+<style>
+@keyframes modalScale {
+    from {
+        transform:scale(0.9);
+        opacity:0;
+    }
+    to {
+        transform:scale(1);
+        opacity:1;
+    }
+}
+.modal.show {
+    display:flex !important;
+}
+</style>

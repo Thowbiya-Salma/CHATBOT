@@ -1,0 +1,80 @@
+<!-- ======================================================
+     PROFILE DROPDOWN COMPONENT
+======================================================= -->
+
+<div style="position:relative; display:inline-block;">
+
+    <!-- PROFILE TRIGGER -->
+    <div class="profile-trigger"
+         style="display:flex; align-items:center; cursor:pointer;">
+
+        <img src="{{ user.profile.profile_image if user.profile and user.profile.profile_image else '/static/images/logo.png' }}"
+             style="width:36px; height:36px; border-radius:50%; object-fit:cover; margin-right:10px;">
+
+        <span style="font-size:14px;">
+            {{ user.name }}
+        </span>
+
+    </div>
+
+
+    <!-- DROPDOWN MENU -->
+    <div class="profile-dropdown"
+         style="
+            display:none;
+            position:absolute;
+            right:0;
+            top:48px;
+            background:#1E293B;
+            border-radius:12px;
+            padding:10px;
+            min-width:170px;
+            box-shadow:var(--shadow-soft);
+            z-index:100;
+         ">
+
+        <!-- PROFILE LINK -->
+        <a href="/profile"
+           style="display:block;
+                  padding:8px 10px;
+                  border-radius:8px;
+                  text-decoration:none;
+                  color:white;">
+            Profile
+        </a>
+
+        <!-- ROLE BADGE -->
+        <div style="padding:8px 10px; font-size:12px; color:var(--text-muted);">
+            Role: {{ user.role | capitalize }}
+        </div>
+
+        <div style="height:1px; background:#334155; margin:8px 0;"></div>
+
+        <!-- LOGOUT -->
+        <a href="/logout"
+           style="display:block;
+                  padding:8px 10px;
+                  border-radius:8px;
+                  text-decoration:none;
+                  color:#EF4444;">
+            Logout
+        </a>
+
+    </div>
+
+</div>
+
+
+<style>
+.profile-dropdown.show {
+    display:block !important;
+}
+
+.profile-dropdown a:hover {
+    background:var(--primary);
+}
+
+.profile-trigger:hover span {
+    color:var(--primary-light);
+}
+</style>

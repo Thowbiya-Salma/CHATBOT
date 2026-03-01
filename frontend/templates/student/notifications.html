@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="main-content">
+
+    <!-- ===============================
+         PAGE HEADER
+    ================================ -->
+    <div style="margin-bottom:30px;">
+        <h1 style="font-size:24px; font-weight:600;">Notifications</h1>
+        <p style="color:var(--text-muted); margin-top:5px;">
+            Updates and responses from the administration
+        </p>
+    </div>
+
+
+    <!-- ===============================
+         NOTIFICATIONS LIST
+    ================================ -->
+
+    {% if notifications %}
+        <div style="display:flex; flex-direction:column; gap:18px;">
+
+            {% for notification in notifications %}
+
+                <div class="card"
+                     style="border-left:5px solid 
+                     {% if not notification.is_read %}
+                         var(--primary-light)
+                     {% else %}
+                         transparent
+                     {% endif %};">
+
+                    <!-- HEADER -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+
+                        <h3 style="font-weight:600;">
+                            {{ notification.title }}
+                        </h3>
+
+                        <span style="font-size:12px; color:var(--text-muted);">
+                            {{ notification.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                        </span>
+
+                    </div>
+
+                    <!-- MESSAGE -->
+                    <div style="color:var(--text-muted); margin-bottom:15px;">
+                        {{ notification.message }}
+                    </div>
+
+                    <!-- ACTION -->
+                    {% if not notification.is_read %}
+                        <button class="mark-read"
+                                data-id="{{ notification.id }}"
+                                style="background:var(--primary-light);
+                                       border:none;
+                                       padding:8px 14px;
+                                       border-radius:8px;
+                                       color:white;
+                                       cursor:pointer;">
+                            Mark as Read
+                        </button>
+                    {% else %}
+                        <span style="font-size:12px; color:#22C55E;">
+                            ✓ Read
+                        </span>
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+        <div class="card" style="text-align:center;">
+            <p style="color:var(--text-muted);">
+                You have no notifications at the moment.
+            </p>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

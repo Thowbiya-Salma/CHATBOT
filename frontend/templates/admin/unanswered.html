@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="main-content">
+
+    <!-- ===============================
+         PAGE HEADER
+    ================================ -->
+    <div style="margin-bottom:30px;">
+        <h1 style="font-size:24px; font-weight:600;">Unanswered Questions</h1>
+        <p style="color:var(--text-muted); margin-top:5px;">
+            Review and respond to student queries
+        </p>
+    </div>
+
+
+    <!-- ===============================
+         QUESTIONS LIST
+    ================================ -->
+
+    {% if questions %}
+        <div style="display:flex; flex-direction:column; gap:20px;">
+
+            {% for question, student in questions %}
+
+                <div class="card">
+
+                    <!-- Question Header -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+
+                        <div>
+                            <strong>{{ student.name }}</strong>
+                            <div style="font-size:12px; color:var(--text-muted);">
+                                {{ question.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                            </div>
+                        </div>
+
+                        <button onclick="toggleAnswerForm({{ question.id }})"
+                                style="background:var(--primary-light); border:none; padding:6px 12px; border-radius:8px; color:white; cursor:pointer;">
+                            Answer
+                        </button>
+
+                    </div>
+
+                    <!-- Question Content -->
+                    <div style="color:var(--text-muted); margin-bottom:15px;">
+                        {{ question.question }}
+                    </div>
+
+
+                    <!-- ===============================
+                         ANSWER FORM (Hidden by default)
+                    ================================ -->
+
+                    <div id="answer-form-{{ question.id }}"
+                         style="display:none; margin-top:15px; border-top:1px solid #334155; padding-top:15px;">
+
+                        <form method="POST" action="/admin/answer/{{ question.id }}">
+
+                            <!-- Keyword -->
+                            <div style="margin-bottom:12px;">
+                                <label style="font-size:13px; color:var(--text-muted);">Keyword (for future matching)</label>
+                                <input type="text"
+                                       name="keyword"
+                                       required
+                                       placeholder="Enter keyword..."
+                                       style="width:100%; padding:10px; border-radius:8px; border:none; background:#1E293B; color:white;">
+                            </div>
+
+                            <!-- Answer -->
+                            <div style="margin-bottom:12px;">
+                                <label style="font-size:13px; color:var(--text-muted);">Answer</label>
+                                <textarea name="answer"
+                                          required
+                                          rows="4"
+                                          placeholder="Type your answer here..."
+                                          style="width:100%; padding:10px; border-radius:8px; border:none; background:#1E293B; color:white;"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                    style="background:var(--primary-light); border:none; padding:10px 18px; border-radius:8px; color:white; cursor:pointer;">
+                                Save Answer
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+        <div class="card" style="text-align:center;">
+            <p style="color:var(--text-muted);">
+                🎉 No unanswered questions at the moment.
+            </p>
+        </div>
+    {% endif %}
+
+</div>
+
+
+<!-- ===============================
+     INLINE SCRIPT
+================================ -->
+<script>
+function toggleAnswerForm(id) {
+    const form = document.getElementById("answer-form-" + id);
+    if (form.style.display === "none") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
+    }
+}
+</script>
+
+{% endblock %}

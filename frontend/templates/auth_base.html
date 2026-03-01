@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ page_title if page_title else "DR. URCW AI" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- GOOGLE FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- GLOBAL STYLES -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+</head>
+
+<body>
+
+    <!-- ======================================================
+         AUTH WRAPPER
+    ======================================================= -->
+    <div class="auth-wrapper">
+
+        {% block content %}
+        {% endblock %}
+
+    </div>
+
+
+    <!-- GLOBAL JS -->
+    <script src="/static/js/app.js"></script>
+
+</body>
+</html>

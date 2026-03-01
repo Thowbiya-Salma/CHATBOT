@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="chat-container">
+
+    <!-- ======================================================
+         LEFT SIDEBAR - CHAT SESSIONS
+    ======================================================= -->
+    <div class="chat-sidebar">
+
+        <div style="margin-bottom:20px;">
+            <a href="/chatbot"
+               style="display:block;
+                      padding:10px;
+                      background:var(--primary-light);
+                      color:white;
+                      text-align:center;
+                      border-radius:10px;
+                      text-decoration:none;
+                      font-weight:600;">
+                + New Chat
+            </a>
+        </div>
+
+        {% if sessions %}
+            {% for session in sessions %}
+
+                <div class="chat-session {% if session.id == active_session %}active{% endif %}"
+                     style="display:flex; justify-content:space-between; align-items:center;">
+
+                    <a href="/chatbot?session_id={{ session.id }}"
+                       style="text-decoration:none; color:inherit; flex:1;">
+                        {{ session.title }}
+                    </a>
+
+                    <div style="position:relative; margin-left:8px;">
+
+                        <button style="background:none;
+                                       border:none;
+                                       color:var(--text-muted);
+                                       font-size:16px;
+                                       cursor:pointer;"
+                                onclick="toggleMenu({{ session.id }})">
+                            ⋮
+                        </button>
+
+                        <div id="menu-{{ session.id }}"
+                             style="display:none;
+                                    position:absolute;
+                                    right:0;
+                                    top:22px;
+                                    background:#1E293B;
+                                    padding:6px;
+                                    border-radius:8px;
+                                    box-shadow:var(--shadow-soft);
+                                    z-index:10;">
+
+                            <div class="rename-session"
+                                 data-id="{{ session.id }}"
+                                 style="padding:6px 10px; cursor:pointer;">
+                                Rename
+                            </div>
+
+                            <div class="delete-session"
+                                 data-id="{{ session.id }}"
+                                 style="padding:6px 10px; cursor:pointer; color:#EF4444;">
+                                Delete
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+        {% endif %}
+
+    </div>
+
+
+    <!-- ======================================================
+         RIGHT SIDE - CHAT AREA
+    ======================================================= -->
+    <div class="chat-area">
+
+        <!-- CHAT MESSAGES -->
+        <div class="chat-messages">
+
+            {% if messages %}
+
+                {% for message in messages %}
+                    <div class="message {{ message.sender }}">
+                        {{ message.message | safe }}
+                    </div>
+                {% endfor %}
+
+            {% else %}
+
+                <div style="text-align:center; margin-top:80px; color:var(--text-muted);">
+                    <h2 style="margin-bottom:10px;">Welcome to DR. URCW AI</h2>
+                    <p>Ask me anything about admissions, courses, exams, placements, or campus facilities.</p>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- CHAT INPUT -->
+        <form id="chat-form" class="chat-input-wrapper">
+
+            <input type="text"
+                   id="chat-input"
+                   name="message"
+                   class="chat-input"
+                   placeholder="Type your message..."
+                   autocomplete="off"
+                   required>
+
+            <button type="submit" class="chat-send">
+                Send
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     INLINE SCRIPT
+======================================================= -->
+<script>
+
+function toggleMenu(id) {
+    const menu = document.getElementById("menu-" + id);
+
+    document.querySelectorAll("[id^='menu-']").forEach(m => {
+        if (m.id !== "menu-" + id) {
+            m.style.display = "none";
+        }
+    });
+
+    if (menu.style.display === "none" || menu.style.display === "") {
+        menu.style.display = "block";
+    } else {
+        menu.style.display = "none";
+    }
+}
+
+</script>
+
+{% endblock %}
