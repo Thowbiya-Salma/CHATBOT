@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 create urcw_bot;
+=======
+create database urcw_bot;
+>>>>>>> 814d1b30431953f9bfde2d7a369d76af61d61208
 use urcw_bot;
 show tables;
 CREATE TABLE users (
